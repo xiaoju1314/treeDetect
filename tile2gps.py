@@ -17,7 +17,8 @@ def parse_args():
             default='GPSData.txt', type=str)
   parser.add_argument('--npy_file_path',dest = 'npy_file_path',help='npy file path',
             default='.\\npy', type=str)
-
+  parser.add_argument('--zoom',dest = 'zoom',help='num of zoom',
+            default='21', type=int)
 
   if len(sys.argv) == 1:
     parser.print_help()
@@ -83,7 +84,7 @@ def gen_gps(txt_name,zoom):
 
             #相对于256图片的像素
             xpixel = xpixel - (x*256)
-            ypixel = ypixel - (y*256)
+            ypixel =256 -( ypixel - (y*256))
 
             # 读取保存的瓦片编号文件的x行y列就是瓦片的编号
             #tile = np.load(idx +".npy")
@@ -94,7 +95,7 @@ def gen_gps(txt_name,zoom):
 
 
             # 每个像素坐标转换成经纬度
-            lat_deg, lon_deg = num2deg(xtile, ytile, xpixel, ypixel,zoom=21)
+            lat_deg, lon_deg = num2deg(xtile, ytile, xpixel, ypixel,zoom)
             lat_deg = abs(lat_deg)
             lon_deg = abs(lon_deg)
 
@@ -108,11 +109,13 @@ if __name__ == '__main__':
     args = parse_args()
     print('Called with args:')
     print(args)
-    list = gen_gps(args.txt_name,21)
+    list = gen_gps(args.txt_name,args.zoom)
+    np.save("list.npy", list)
     with open(os.path.join(args.file_name), 'w') as f:
         for i in list:
             f.write('{} {} {}  {} {}    {} {}\n'.format(i[0],i[1],i[2],i[3],i[4],i[5],i[6]))
 
 
 
+#python tile2gps.py --txt_dir test_tree.txt --result_file_name GPSData.txt --npy_file_path .\npy --zoom 21
 
